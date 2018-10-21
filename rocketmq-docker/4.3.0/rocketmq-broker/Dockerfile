@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM apache/rocketmq-base:4.3.0
+FROM yaanhyy/rocketmq-base
 
 EXPOSE 10909 10911
 
@@ -23,6 +23,9 @@ RUN mv ${ROCKETMQ_HOME}/bin/runbroker-customize.sh ${ROCKETMQ_HOME}/bin/runbroke
  && chmod +x ${ROCKETMQ_HOME}/bin/runbroker.sh \
  && chmod +x ${ROCKETMQ_HOME}/bin/mqbroker
 
+COPY scripts/ ${ROCKETMQ_HOME}/bin/
+
 CMD cd ${ROCKETMQ_HOME}/bin \
  && export JAVA_OPT=" -Duser.home=/opt" \
- && sh mqbroker
+ && sh mqbroker -n rmqnamesrv:9876 -c ${ROCKETMQ_HOME}/bin/broker.conf
+

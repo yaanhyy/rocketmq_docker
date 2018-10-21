@@ -1,8 +1,10 @@
-version: '2'
+version: '3.4'
 services:
   namesrv:
     image: apache/rocketmq-namesrv:4.3.0-compose
     container_name: rmqnamesrv
+    networks:
+      - exchange
     build:
       context: ./rocketmq-namesrv
       args:
@@ -12,9 +14,23 @@ services:
     volumes:
       - ./data/namesrv/logs:/opt/logs
       - ./data/namesrv/store:/opt/store
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1g
+
   broker:
     image: apache/rocketmq-broker:4.3.0-compose
     container_name: rmqbroker
+    networks:
+      - exchange
     build:
       context: ./rocketmq-broker
       args:
@@ -27,3 +43,17 @@ services:
       - ./data/broker/store:/opt/store
     depends_on:
       - namesrv
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1g
+networks:
+  exchange:
+    driver: overlay
